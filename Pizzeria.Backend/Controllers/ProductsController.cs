@@ -47,5 +47,49 @@ namespace Pizzeria.Backend.Controllers
             await _context.SaveChangesAsync();
             return Ok(product);
         }
+
+        [HttpPut]
+        public async Task<IActionResult> PutAsync(Producto product)
+        {
+            try
+            {
+                var currentProduct = await _context.Productos.FindAsync(product.Id);
+                if (currentProduct == null)
+                {
+                    return NotFound();
+                }
+                currentProduct.Nombre = product.Nombre;
+                currentProduct.Descripcion = product.Descripcion;
+                currentProduct.precio = product.precio;
+
+                await _context.SaveChangesAsync();
+                return Ok(currentProduct);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteAsync(int id)
+        {
+            try
+            {
+                var producto = await _context.Productos.FindAsync(id);
+                if (producto == null)
+                {
+                    return NotFound();
+                }
+                _context.Remove(producto);
+                await _context.SaveChangesAsync();
+                return Ok("Eliminado");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e);
+            }
+        }
     }
 }
