@@ -1,18 +1,21 @@
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-
 namespace Pizzeria.Shared.Entites;
 
-public class Producto
+public class Ventas
 {
     public int Id { get; set; }
 
+    [ForeignKey("Usuario")]
+    public int IdUsuario { get; set; }
+    public Usuario Usuario { get; set; } = null!;
+
     [Required]
-    public string Nombre { get; set; } = null!;
-    public string Descripcion { get; set; } = string.Empty;
+    public DateTime Fecha { get; set; }
 
     [Column(TypeName = "decimal(18,2)")]
     [Required]
-    public Decimal precio { get; set; }
+    public decimal Total { get; set; }
 }

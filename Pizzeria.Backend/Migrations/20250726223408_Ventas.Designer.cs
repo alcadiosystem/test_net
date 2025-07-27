@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pizzeria.Backend.data;
@@ -11,9 +12,11 @@ using Pizzeria.Backend.data;
 namespace Pizzeria.Backend.Migrations
 {
     [DbContext(typeof(DataContext))]
-    partial class DataContextModelSnapshot : ModelSnapshot
+    [Migration("20250726223408_Ventas")]
+    partial class Ventas
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,35 +24,6 @@ namespace Pizzeria.Backend.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
-
-            modelBuilder.Entity("Pizzeria.Shared.Entites.DetalleVenta", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("Cantidad")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("IdProducto")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("IdVentas")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("PrecioUnitario")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("IdProducto");
-
-                    b.HasIndex("IdVentas");
-
-                    b.ToTable("DetalleVentas");
-                });
 
             modelBuilder.Entity("Pizzeria.Shared.Entites.Producto", b =>
                 {
@@ -119,37 +93,21 @@ namespace Pizzeria.Backend.Migrations
                     b.Property<decimal>("Total")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("IdUsuario");
+                    b.HasIndex("UsuarioId");
 
                     b.ToTable("Ventas");
-                });
-
-            modelBuilder.Entity("Pizzeria.Shared.Entites.DetalleVenta", b =>
-                {
-                    b.HasOne("Pizzeria.Shared.Entites.Producto", "Producto")
-                        .WithMany()
-                        .HasForeignKey("IdProducto")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Pizzeria.Shared.Entites.Ventas", "Ventas")
-                        .WithMany()
-                        .HasForeignKey("IdVentas")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Producto");
-
-                    b.Navigation("Ventas");
                 });
 
             modelBuilder.Entity("Pizzeria.Shared.Entites.Ventas", b =>
                 {
                     b.HasOne("Pizzeria.Shared.Entites.Usuario", "Usuario")
                         .WithMany("Ventas")
-                        .HasForeignKey("IdUsuario")
+                        .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
