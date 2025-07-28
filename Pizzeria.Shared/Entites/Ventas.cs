@@ -20,7 +20,7 @@ public class Ventas
     [Required]
     public decimal Total { get; set; }
 
-    public ICollection<DetalleVenta>? DetalleVentas { get; set; }
+    public ICollection<DetalleVenta> DetalleVentas { get; set; } = new List<DetalleVenta>();
 
     //Campo Calculado total venta
     public decimal TotalG => DetalleVentas == null ? 0 : DetalleVentas.Sum(x => x.Cantidad * x.PrecioUnitario);

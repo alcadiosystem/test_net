@@ -240,7 +240,7 @@ public class VentasController : ControllerBase
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> EliminarVenta(int id)
+    public async Task<IActionResult> DeleteVenta(int id)
     {
         var venta = await _context.Ventas
             .Include(v => v.DetalleVentas)
@@ -251,7 +251,7 @@ public class VentasController : ControllerBase
             return NotFound(new { message = $"No se encontró la venta con ID {id}." });
         }
 
-        // Eliminar los detalles primero (por DeleteBehavior.Restrict)
+        // Eliminar detalles primero si existen
         if (venta.DetalleVentas != null && venta.DetalleVentas.Any())
         {
             _context.DetalleVentas.RemoveRange(venta.DetalleVentas);
@@ -265,6 +265,130 @@ public class VentasController : ControllerBase
         return Ok(new { message = $"La venta con ID {id} fue eliminada correctamente." });
     }
 
+
+    [HttpGet("{ventaId}/detalles")]
+    public async Task<IActionResult> GetDetallesDeVenta(int ventaId)
+    {
+        var detalles = await _context.DetalleVentas
+            .Where(d => d.IdVentas == ventaId)
+            .Select(d => new
+            {
+                Id = d.Id,
+                ProductoId = d.IdProducto,
+                Cantidad = d.Cantidad,
+                Precio = d.PrecioUnitario,
+                Total = d.Cantidad * d.PrecioUnitario
+            })
+            .ToListAsync();
+
+        if (detalles == null || !detalles.Any())
+        {
+            return NotFound(new { message = $"No se encontraron detalles para la venta con ID {ventaId}." });
+        }
+
+        return Ok(detalles);
+    }
+
+
+    [HttpGet("{ventaId}/detalles/{id}")]
+    public async Task<IActionResult> GetDetalleDeVenta(int ventaId, int id)
+    {
+        var detalle = await _context.DetalleVentas
+            .Where(d => d.IdVentas == ventaId && d.Id == id)
+            .Select(d => new
+            {
+                Id = d.Id,
+                ProductoId = d.IdProducto,
+                Cantidad = d.Cantidad,
+                Precio = d.PrecioUnitario,
+                Total = d.Cantidad * d.PrecioUnitario
+            })
+            .FirstOrDefaultAsync();
+
+        if (detalle == null)
+        {
+            return NotFound(new { message = $"No se encontró el detalle con ID {id} para la venta {ventaId}." });
+        }
+
+        return Ok(detalle);
+    }
+
+
+    [HttpPut("{ventaId}/detalles/{id}")]
+    public async Task<IActionResult> ActualizarDetalleVenta(int ventaId, int id, [FromBody] ActualizarDetalleVentaRequest request)
+    {
+        if (id != request.Id)
+        {
+            return BadRequest(new { message = "El ID del detalle en la URL no coincide con el del cuerpo." });
+        }
+
+        var detalle = await _context.DetalleVentas
+            .FirstOrDefaultAsync(d => d.Id == id && d.IdVentas == ventaId);
+
+        if (detalle == null)
+        {
+            return NotFound(new { message = $"No se encontró el detalle {id} en la venta {ventaId}." });
+        }
+
+        // Actualizar campos
+        detalle.IdProducto = request.ProductoId;
+        detalle.Cantidad = request.Cantidad;
+        detalle.PrecioUnitario = request.Precio;
+
+        await _context.SaveChangesAsync();
+
+        // Recalcular el total de la venta
+        var venta = await _context.Ventas
+            .Include(v => v.DetalleVentas)
+            .FirstOrDefaultAsync(v => v.Id == ventaId);
+
+        if (venta != null)
+        {
+            venta.Total = venta.DetalleVentas.Sum(d => d.Cantidad * d.PrecioUnitario);
+            _context.Ventas.Update(venta);
+            await _context.SaveChangesAsync();
+        }
+
+        // Respuesta con los campos requeridos
+        return Ok(new
+        {
+            Id = detalle.Id,
+            ProductoId = detalle.IdProducto,
+            Cantidad = detalle.Cantidad,
+            Precio = detalle.PrecioUnitario,
+            Total = detalle.Cantidad * detalle.PrecioUnitario
+        });
+    }
+
+
+    [HttpDelete("{ventaId}/detalles/{id}")]
+    public async Task<IActionResult> DeleteDetalleVenta(int ventaId, int id)
+    {
+        var detalle = await _context.DetalleVentas
+            .FirstOrDefaultAsync(d => d.Id == id && d.IdVentas == ventaId);
+
+        if (detalle == null)
+        {
+            return NotFound(new { message = $"No se encontró el detalle con ID {id} para la venta {ventaId}." });
+        }
+
+        _context.DetalleVentas.Remove(detalle);
+        await _context.SaveChangesAsync();
+
+        // Recalcular el total de la venta
+        var venta = await _context.Ventas
+            .Include(v => v.DetalleVentas)
+            .FirstOrDefaultAsync(v => v.Id == ventaId);
+
+        if (venta != null)
+        {
+            venta.Total = venta.DetalleVentas.Sum(d => d.Cantidad * d.PrecioUnitario);
+            _context.Ventas.Update(venta);
+            await _context.SaveChangesAsync();
+        }
+
+        return Ok(new { message = $"El detalle con ID {id} fue eliminado correctamente de la venta {ventaId}." });
+    }
 
 }
 
