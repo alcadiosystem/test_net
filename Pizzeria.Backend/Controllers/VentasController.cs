@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Pizzeria.Backend.data;
+using Pizzeria.Backend.helper;
 using Pizzeria.Shared.Entites;
 using Pizzeria.Shared.models;
 
@@ -27,7 +24,9 @@ public class VentasController : ControllerBase
     public async Task<IActionResult> GetVentas(
         [FromQuery] DateTime? fechaInicio,
         [FromQuery] DateTime? fechaFin,
-        [FromQuery] string? search
+        [FromQuery] string? search,
+        [FromQuery] int pageNumber = 1,
+        [FromQuery] int pageSize = 10
     )
     {
         var query = _context.Ventas
@@ -54,18 +53,20 @@ public class VentasController : ControllerBase
                 query = query.Where(v => v.Usuario.Nombre.Contains(search));
             }
         }
-        var ventas = await query
-        .Select(v => new
-        {
-            Id = v.Id,
-            UsuarioId = v.IdUsuario,
-            NombreUsuario = v.Usuario.Nombre,
-            Fecha = v.Fecha,
-            Total = v.Total
-        })
-        .ToListAsync();
+        var ventas = query
+            .Select(v => new
+            {
+                Id = v.Id,
+                UsuarioId = v.IdUsuario,
+                NombreUsuario = v.Usuario.Nombre,
+                Fecha = v.Fecha,
+                Total = v.Total
+            });
 
-        return Ok(ventas);
+        //Paginacion
+        var resultado = await ventas.PaginarAsync(pageNumber,pageSize);
+
+        return Ok(resultado);
     }
 
     //Devuelve los detalles de una venta específica por su ID.

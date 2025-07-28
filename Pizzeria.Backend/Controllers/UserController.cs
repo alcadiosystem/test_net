@@ -1,8 +1,7 @@
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Pizzeria.Backend.data;
+using Pizzeria.Backend.helper;
 using Pizzeria.Shared.Entites;
 
 namespace Pizzeria.Backend.Controllers
@@ -20,9 +19,14 @@ namespace Pizzeria.Backend.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetAsync([FromQuery] string? search)
+        public async Task<IActionResult> GetAsync(
+            [FromQuery] string? search,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10
+        )
         {
             var query = _context.Usuarios.AsQueryable();
+
             if (!string.IsNullOrWhiteSpace(search))
             {
                 query = query.Where(
@@ -31,7 +35,8 @@ namespace Pizzeria.Backend.Controllers
                 );
             }
 
-            var usuarios = await query.ToListAsync();
+            var usuarios = await query.PaginarAsync(pageNumber, pageSize);
+
             return Ok(usuarios);
         }
 

@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Pizzeria.Backend.data;
+using Pizzeria.Backend.helper;
 using Pizzeria.Shared.Entites;
 
 namespace Pizzeria.Backend.Controllers
@@ -17,17 +17,29 @@ namespace Pizzeria.Backend.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAsync([FromQuery] string? name)
+        public async Task<IActionResult> GetAsync(
+            [FromQuery] string? name,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10
+        )
         {
             var query = _context.Productos.AsQueryable();
 
-            if (name != null)
+            // Filtro por nombre
+            if (!string.IsNullOrWhiteSpace(name))
             {
                 query = query.Where(x => x.Nombre.Contains(name));
             }
-            var product = await query.ToListAsync();
-            return Ok(product);
+
+            // Ordenar por nombre
+            query = query.OrderBy(x => x.Nombre);
+
+            // Usar el helper de paginación
+            var resultado = await query.PaginarAsync(pageNumber, pageSize);
+
+            return Ok(resultado);
         }
+
 
         [HttpGet("{id}")]
         public async Task<IActionResult> GetAsync(int id)
