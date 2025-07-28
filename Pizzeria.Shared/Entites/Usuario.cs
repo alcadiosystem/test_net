@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 
 namespace Pizzeria.Shared.Entites;
@@ -14,6 +15,7 @@ public class Usuario
     [Required]
     public int DNI { get; set; }
 
+    [JsonIgnore]
     public ICollection<Ventas>? Ventas { get; set; }
 
     //Propiedad de lectura para las ventas

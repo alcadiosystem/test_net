@@ -12,13 +12,25 @@ namespace Pizzeria.Backend.data
         public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Producto> Productos { get; set; }
         public DbSet<Ventas> Ventas { get; set; }
-
         public DbSet<DetalleVenta> DetalleVentas { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<Usuario>().HasIndex(usuario => usuario.DNI).IsUnique();
             modelBuilder.Entity<Producto>().HasIndex(producto => producto.Nombre).IsUnique();
+
+            // Relación 1 Venta → muchos DetallesVenta
+            modelBuilder.Entity<DetalleVenta>()
+                .HasOne(d => d.Ventas)
+                .WithMany(v => v.DetalleVentas)
+                .HasForeignKey(d => d.IdVentas);
+
+            // Relación 1 Producto → muchos DetallesVenta
+            modelBuilder.Entity<DetalleVenta>()
+                .HasOne(d => d.Producto)
+                .WithMany(p => p.DetalleVentas)
+                .HasForeignKey(d => d.IdProducto);
+
             DisableCascadingDelete(modelBuilder);
         }
         //Permite quitar el eliminado en cascada

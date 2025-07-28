@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 
 namespace Pizzeria.Shared.Entites;
@@ -15,4 +16,7 @@ public class Producto
     [Column(TypeName = "decimal(18,2)")]
     [Required]
     public Decimal precio { get; set; }
+
+    [JsonIgnore]
+    public ICollection<DetalleVenta>? DetalleVentas { get; set; }
 }
