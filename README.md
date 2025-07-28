@@ -24,10 +24,10 @@ Ejecutarlo en una versión superior o inferior podría generar errores.
 
 1. Clonar el repositorio.
 2. Abrir Visual Studio y seleccionar **“Abrir un proyecto o una solución”**.
-3. Buscar y seleccionar la carpeta `prueba_tecnica`.
+3. Buscar y seleccionar la carpeta `test_net`.
 4. Abrir el archivo `Pizzeria.sln`.
 5. Visual Studio configurará inicialmente la solución. Luego:
-    1. Abrir el **Explorador de soluciones**, buscar `Pizzeria.API`.
+    1. Abrir el **Explorador de soluciones**, buscar `Pizzeria.Backend`.
     2. Editar el archivo `appsettings.json`, modificando la propiedad **ConnectionStrings** con tus credenciales de PostgreSQL.
     3. Abrir **Herramientas → Administrador de paquetes NuGet → Consola del Administrador**.
     4. Ejecutar:
@@ -36,7 +36,7 @@ Ejecutarlo en una versión superior o inferior podría generar errores.
        ```
        Esto instalará la base de datos.
     5. Compilar la solución: **Compilar → Compilar Solución** o `Ctrl + Mayús + B`.
-    6. Asegurarse de que `Pizzeria.API` esté configurado como proyecto de inicio y presionar **Run**.
+    6. Asegurarse de que `Pizzeria.Backend` esté configurado como proyecto de inicio y presionar **Run**.
     7. Se abrirá Swagger en el navegador para probar la API.
 
 ---
@@ -49,18 +49,17 @@ Ejecutarlo en una versión superior o inferior podría generar errores.
    ```bash
    dotnet build
    ```
-4. Aplicar las migraciones:
+4. Ingresar al `Pizzeria.Backend`.
+5. Editar el archivo `appsettings.json`, modificando la propiedad **ConnectionStrings** con tus credenciales de PostgreSQL.
+6. Aplicar las migraciones:
     ```bash
-    dotnet ef database update \
-    --project Pizzeria.Infrastructure/Pizzeria.Infrastructure.csproj \
-    --startup-project Pizzeria.API/Pizzeria.API.csproj
+    dotnet ef database update
     ```
-5. Compilar nuevamente:
+7. Compilar nuevamente:
     ```bash
     dotnet build
     ```
-6. Entrar a la carpeta Pizzeria.API.
-7. Ejecutar:
+8. Ejecutar:
     ```bash
     dotnet watch run
     ```
